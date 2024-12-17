@@ -1,9 +1,32 @@
+from random import randint
 from collections import defaultdict
 
 from utils import parse_input
 
 # file_name = "test.txt"
 file_name = "input.txt"
+
+
+def get_adv_combo_operand_output(operand, register_mappings: defaultdict) -> int:
+    if 0 <= operand <= 3:
+        return int(register_mappings["A"] / (2 ** operand))
+    elif operand == 4:
+        return int(register_mappings["A"] / (2 ** register_mappings["A"]))
+    elif operand == 5:
+        return int(register_mappings["A"] / (2 ** register_mappings["B"]))
+    elif operand == 6:
+        return int(register_mappings["A"] / (2 ** register_mappings["C"]))
+
+
+def get_mod_combo_operand_output(operand, register_mappings: defaultdict) -> int:
+    if 0 <= operand <= 3:
+        return operand % 8
+    elif operand == 4:
+        return register_mappings["A"] % 8
+    elif operand == 5:
+        return register_mappings["B"] % 8
+    elif operand == 6:
+        return register_mappings["C"] % 8
 
 
 def part_1():
@@ -28,19 +51,56 @@ def part_1():
     - bdv (opcode 6): Same as adv, but store value in B
     - cdv (opcode 7): Same as adv, but store value in C
     """
-    sections = parse_input(file_name, "\n\n")
+    pass
+    # sections = parse_input(file_name, "\n\n")
+    #
+    # program = list(map(int, sections[1].replace("Program: ", "").split(",")))
+    #
+    # for line in sections[0].split("\n"):
+    #     register, value = line.replace("Register ", "").split(": ")
+    #     register_mappings[register] = int(value)
+    #
+    # outputs = []
+    # instruction_pointer = 0
+    #
+    # while instruction_pointer < len(program):
+    #     i = instruction_pointer
+    #
+    #     # Instruction x, operand y
+    #     x, y = program[i], program[i + 1]
+    #
+    #     match x:
+    #         case 0:
+    #             register_mappings["A"] = get_adv_combo_operand_output(y)
+    #             instruction_pointer += 2
+    #         case 1:
+    #             register_mappings["B"] = register_mappings["B"] ^ y
+    #             instruction_pointer += 2
+    #         case 2:
+    #             register_mappings["B"] = get_mod_combo_operand_output(y)
+    #             instruction_pointer += 2
+    #         case 3:
+    #             instruction_pointer = instruction_pointer + 2 if register_mappings["A"] == 0 else y
+    #         case 4:
+    #             register_mappings["B"] = register_mappings["B"] ^ register_mappings["C"]
+    #             instruction_pointer += 2
+    #         case 5:
+    #             outputs.append(get_mod_combo_operand_output(y))
+    #             instruction_pointer += 2
+    #         case 6:
+    #             register_mappings["B"] = get_adv_combo_operand_output(y)
+    #             instruction_pointer += 2
+    #         case 7:
+    #             register_mappings["C"] = get_adv_combo_operand_output(y)
+    #             instruction_pointer += 2
+    #
+    # print(int("".join(list(map(str, outputs)))))
+    #
+    # print("Part 1: ", ",".join(list(map(str, outputs))))
 
-    register_mappings = defaultdict(int)
-    program = list(map(int, sections[1].replace("Program: ", "").split(",")))
 
-    for line in sections[0].split("\n"):
-        register, value = line.replace("Register ", "").split(": ")
-        register_mappings[register] = int(value)
-
-    # print(register_mappings, program)
-
+def test(program: list[int], register_mappings: defaultdict) -> int:
     outputs = []
-
     instruction_pointer = 0
 
     while instruction_pointer < len(program):
@@ -51,80 +111,57 @@ def part_1():
 
         match x:
             case 0:
-                if 0 <= y <= 3:
-                    register_mappings["A"] = int(register_mappings["A"] / (2 ** y))
-                elif y == 4:
-                    register_mappings["A"] = int(register_mappings["A"] / (2 ** register_mappings["A"]))
-                elif y == 5:
-                    register_mappings["A"] = int(register_mappings["A"] / (2 ** register_mappings["B"]))
-                elif y == 6:
-                    register_mappings["A"] = int(register_mappings["A"] / (2 ** register_mappings["C"]))
+                register_mappings["A"] = get_adv_combo_operand_output(y, register_mappings)
                 instruction_pointer += 2
             case 1:
                 register_mappings["B"] = register_mappings["B"] ^ y
                 instruction_pointer += 2
             case 2:
-                if 0 <= y <= 3:
-                    register_mappings["B"] = y % 8
-                elif y == 4:
-                    register_mappings["B"] = register_mappings["A"] % 8
-                elif y == 5:
-                    register_mappings["B"] = register_mappings["B"] % 8
-                elif y == 6:
-                    register_mappings["B"] = register_mappings["C"] % 8
+                register_mappings["B"] = get_mod_combo_operand_output(y, register_mappings)
                 instruction_pointer += 2
             case 3:
-                if register_mappings["A"] == 0:
-                    instruction_pointer += 2
-                else:
-                    instruction_pointer = y
+                instruction_pointer = instruction_pointer + 2 if register_mappings["A"] == 0 else y
             case 4:
                 register_mappings["B"] = register_mappings["B"] ^ register_mappings["C"]
                 instruction_pointer += 2
             case 5:
-                if 0 <= y <= 3:
-                    outputs.append(y % 8)
-                elif y == 4:
-                    outputs.append(register_mappings["A"] % 8)
-                elif y == 5:
-                    outputs.append(register_mappings["B"] % 8)
-                elif y == 6:
-                    outputs.append(register_mappings["C"] % 8)
+                outputs.append(get_mod_combo_operand_output(y, register_mappings))
                 instruction_pointer += 2
             case 6:
-                if 0 <= y <= 3:
-                    register_mappings["B"] = int(register_mappings["A"] / (2 ** y))
-                elif y == 4:
-                    register_mappings["B"] = int(register_mappings["A"] / (2 ** register_mappings["A"]))
-                elif y == 5:
-                    register_mappings["B"] = int(register_mappings["A"] / (2 ** register_mappings["B"]))
-                elif y == 6:
-                    register_mappings["B"] = int(register_mappings["A"] / (2 ** register_mappings["C"]))
+                register_mappings["B"] = get_adv_combo_operand_output(y, register_mappings)
                 instruction_pointer += 2
             case 7:
-                if 0 <= y <= 3:
-                    register_mappings["C"] = int(register_mappings["A"] / (2 ** y))
-                elif y == 4:
-                    register_mappings["C"] = int(register_mappings["A"] / (2 ** register_mappings["A"]))
-                elif y == 5:
-                    register_mappings["C"] = int(register_mappings["A"] / (2 ** register_mappings["B"]))
-                elif y == 6:
-                    register_mappings["C"] = int(register_mappings["A"] / (2 ** register_mappings["C"]))
+                register_mappings["C"] = get_adv_combo_operand_output(y, register_mappings)
                 instruction_pointer += 2
 
-    print(len(outputs), len(program))
-    print("Part 1: ", ",".join(list(map(str, outputs))))
+    return int("".join(list(map(str, outputs))))
 
 
 def part_2():
-    lines = parse_input(file_name)
-    print(lines)
+    register_mappings = defaultdict(int)
+    sections = parse_input(file_name, "\n\n")
 
-    total = 0
+    program = list(map(int, sections[1].replace("Program: ", "").split(",")))
 
-    print("Part 2: ", total)
+    # count = 100_000_000_000_000
+
+    def get_random_seed():
+        s = ""
+        for i in range(16):
+            s = s + str(randint(1, 7))
+
+        return int(s)
+
+    output = 0
+
+    while output != int("".join(list(map(str, program)))):
+        register_mappings["A"] = get_random_seed()
+        output = test(program, register_mappings)
+        print(output)
+
+    # print("Part 2: ", 0)
 
 
 if __name__ == "__main__":
-    part_1()
-    # part_2()
+    # part_1()
+    part_2()
